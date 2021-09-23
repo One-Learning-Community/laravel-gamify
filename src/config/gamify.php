@@ -3,6 +3,8 @@
 return [
     // Model which will be having points, generally it will be User
     'payee_model' => '\App\User',
+    
+    'payee_badges_table' => 'user_badges',
 
     // Reputation model
     'reputation_model' => '\QCod\Gamify\Reputation',
