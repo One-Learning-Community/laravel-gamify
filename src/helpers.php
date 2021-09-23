@@ -2,6 +2,20 @@
 
 use QCod\Gamify\PointType;
 
+if (!function_exists('getCurrentPayee')) {
+    /**
+     * Get current payee
+     */
+    function getCurrentPayee()
+    {
+        if(app()->has('current-payee')) {
+            return app()->get('current-payee');
+        }
+
+        return auth()->user();
+    }
+}
+
 if (!function_exists('givePoint')) {
 
     /**
@@ -12,7 +26,7 @@ if (!function_exists('givePoint')) {
      */
     function givePoint(PointType $pointType, $payee = null)
     {
-        $payee = $payee ?? auth()->user();
+        $payee = $payee ?? getCurrentPayee();
 
         if (!$payee) {
             return;
@@ -32,7 +46,7 @@ if (!function_exists('undoPoint')) {
      */
     function undoPoint(PointType $pointType, $payee = null)
     {
-        $payee = $payee ?? auth()->user();
+        $payee = $payee ?? getCurrentPayee();
 
         if (!$payee) {
             return;
