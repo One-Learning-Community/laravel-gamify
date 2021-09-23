@@ -13,7 +13,7 @@ class Badge extends Model
      */
     public function users()
     {
-        return $this->belongsToMany(config('gamify.payee_model'), 'user_badges')
+        return $this->belongsToMany(config('gamify.payee_model'), config('gamify.payee_badges_table'))
             ->withTimestamps();
     }
 
