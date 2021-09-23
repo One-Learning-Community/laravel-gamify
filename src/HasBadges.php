@@ -11,7 +11,7 @@ trait HasBadges
      */
     public function badges()
     {
-        return $this->belongsToMany(config('gamify.badge_model'), 'user_badges')
+        return $this->belongsToMany(config('gamify.badge_model'), config('gamify.payee_badges_table'))
             ->withTimestamps();
     }
 
