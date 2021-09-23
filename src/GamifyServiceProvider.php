@@ -9,6 +9,7 @@ use Illuminate\Support\ServiceProvider;
 use QCod\Gamify\Console\MakeBadgeCommand;
 use QCod\Gamify\Console\MakePointCommand;
 use QCod\Gamify\Events\ReputationChanged;
+use Symfony\Component\Finder\Finder;
 
 class GamifyServiceProvider extends ServiceProvider
 {
@@ -57,7 +58,7 @@ class GamifyServiceProvider extends ServiceProvider
         $this->app->singleton('badges', function () {
             return cache()->rememberForever('gamify.badges.all', function () {
                 return $this->getBadges()->map(function ($badge) {
-                    return new $badge;
+                    return resolve($badge);
                 });
             });
         });
@@ -77,12 +78,28 @@ class GamifyServiceProvider extends ServiceProvider
 
         $badges = [];
 
-        foreach (glob(app_path('/Gamify/Badges/') . '*.php') as $file) {
-            if (is_file($file)) {
-                $badges[] = app($badgeRootNamespace . '\\' . pathinfo($file, PATHINFO_FILENAME));
+        $basePath = config('gamify.badge_class_path', app_path('/Gamify/Badges/'));
+        $badgeClasses = Finder::create()
+            ->in($basePath)
+            ->name('*.php')
+            ->files();
+
+        foreach ($badgeClasses as $file) {
+            $className = $badgeRootNamespace . str_replace('/', '\\', substr($file->getPath(), strlen($basePath))) . '\\' . $file->getBasename('.php');
+            if (class_exists($className)) {
+                $clazz = new \ReflectionClass($className);
+                if (!$clazz->isAbstract()) {
+                    $badges[] = $className;
+                }
             }
         }
 
-        return collect($badges);
+        $badges = collect($badges);
+
+        if ($this->app->has('badges-resolver')) {
+            $badges = $badges->concat($this->app->get('badges-resolver'));
+        }
+
+        return $badges;
     }
 }
