@@ -58,7 +58,7 @@ class GamifyServiceProvider extends ServiceProvider
         $this->app->singleton('badges', function () {
             return cache()->rememberForever('gamify.badges.all', function () {
                 return $this->getBadges()->map(function ($badge) {
-                    return resolve($badge);
+                    return is_object($badge) ? $badge : resolve($badge);
                 });
             });
         });
